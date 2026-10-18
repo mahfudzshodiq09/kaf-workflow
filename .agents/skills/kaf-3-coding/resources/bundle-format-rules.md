@@ -24,20 +24,16 @@ Saat men-generate kode untuk Slice 3A, 3B, atau 3C, kamu **WAJIB** mengeluarkan 
 
 ## 3. Prinsip Anti AI-Slop (Kode & Tampilan Bersih)
 1. **Anti AI-Slop pada Kode:**
-   - **Nol Komentar Basa-Basi:** Dilarang menulis komentar sampah khas AI yang mengulang kode (misal: `// Import dependencies`, `// Define state`, `// Handle form submission`). Tulis komentar HANYA untuk menjelaskan aturan bisnis akademik yang non-trivial.
+   - **Nol Komentar Basa-Basi:** Dilarang menulis komentar sampah khas AI yang mengulang kode (misal: `// Import dependencies`, `// Define state`, `// Handle form submission`). Tulis komentar HANYA untuk menjelaskan aturan bisnis yang non-trivial.
    - **Strict TypeScript Tanpa `any`:** Dilarang keras menggunakan `: any`, `as any`, atau `@ts-ignore`. Gunakan tipe dari `@prisma/client` dan `z.infer<typeof Schema>`.
    - **Tanpa Kode Mati:** Jangan menyisakan import, variabel, atau fungsi yang tidak terpakai.
-2. **Anti AI-Slop & Kepatuhan Mutlak `docs/UI/design_system.md` pada Tampilan UI:**
-   - **Wajib Patuh `docs/UI/design_system.md` (Single Source of Truth Visual):**
-     - **Token Warna CSS Variabel & Larangan Inline Style Tombol:** Dilarang menulis hex `#...` di komponen/halaman. **DILARANG KERAS menulis `style={{ backgroundColor: ... }}` atau `style={{ color: ... }}` pada `<Button />`, `<Tag />`, atau komponen PrimeReact** karena seluruh varian warna tombol (`solid`, `p-button-outlined`, `p-button-text`, `p-button-soft`, `p-button-danger`, `p-button-warning`, `p-button-success`) sudah diatur terpusat di `globals.css`.
-     - **Hierarki Tombol (§6):** Hanya boleh ada **1 tombol utama (solid)** per area. Tombol aksi lain wajib menggunakan `outlined`, `text`, atau `className="p-button-soft"`. Tombol hapus di dalam baris tabel wajib menggunakan `className="p-button-danger p-button-text p-button-sm"` (ikon merah di atas latar transparan, hover merah lembut `--danger-50`).
-     - **Tata Letak Berjiwa Desain (Layout Archetypes):**
-       - Jangan menumpuk tabel rincian dan kotak chat secara vertikal di dalam modal sempit. Untuk dialog **Rincian & Konsultasi**, wajib gunakan **Split-View 2 Kolom (`grid-cols-1 lg:grid-cols-12`, lebar dialog `max-w-5xl`)**: Kolom Kiri (7 kolom / ~60%) untuk Kartu Ringkasan & Tabel Rincian Mata Kuliah, dan Kolom Kanan (5 kolom / ~40%) untuk Panel Percakapan bergaya pesan modern dengan *header* lawan bicara, gelembung pesan rapi, dan *input* pesan di bagian bawah.
-     - **Tipografi & Angka:** Gunakan `Plus Jakarta Sans` dengan ukuran dasar `html { font-size: 14px }`, judul halaman `1.75rem/700`, judul kartu `1.1rem/700`, label kapital `0.75rem/600` (`letter-spacing: 0.06em`), dan kolom angka di tabel wajib rata kanan (`tabular-nums`).
-     - **Radius & Jarak:** Tombol & isian `12px` (`--radius-md`), kartu & tabel `16px` (`--radius-lg`), dialog `24px` (`--radius-2xl`), tag berbentuk pill (`--radius-full`). Padding kartu `24px` (HP `16px`), jarak antar kartu `20px`.
-     - **Ikon Wajib `lucide-react`:** Gunakan ikon dari `lucide-react` (`strokeWidth={2}`, ukuran `16` pada tombol/teks, `20` pada menu, `24` pada empty state). Tombol hanya-ikon wajib memiliki `aria-label`.
-     - **Layout `AppShell` & Banner Peran:** Topbar `72px` blur, sidebar `260px` (menu aktif latar `--primary-50`, teks `--primary-700`, garis kiri `3px` `--primary-500`), serta pita simulasi **Ganti peran** di atas topbar memakai latar `--warning-50` dan teks `--warning-700`.
-     - **Kosakata Baku Bahasa Indonesia:** Gunakan istilah **Ganti peran** (bukan *Switch role*), **Masuk / Keluar** (bukan *Login / Logout*).
+2. **Anti AI-Slop & Kepatuhan Mutlak Design System (`designSystem` di `kaf.config.json`) pada Tampilan UI:**
+   - **Design system proyek adalah satu-satunya acuan visual** (warna, huruf, radius, jarak, ikon, istilah). Jika ada yang tidak diatur, pilih yang paling sederhana dan konsisten dengan yang sudah ada.
+   - **Token warna lewat variabel CSS:** dilarang menulis hex `#...` di komponen/halaman, dan dilarang `style={{ backgroundColor/color }}` pada tombol/tag/komponen library — varian warna diatur terpusat di CSS global.
+   - **Hierarki tombol:** hanya **1 tombol utama** per area; aksi lain memakai varian sekunder/outline/teks. Aksi hapus di baris tabel memakai varian bahaya yang ringan + konfirmasi.
+   - **Tata letak berjiwa desain:** gunakan proporsi dari wireframe di spec (mis. split-view 2 kolom untuk rincian + percakapan), jangan menumpuk semua isi vertikal di dialog sempit.
+   - **Angka di tabel rata kanan** (`tabular-nums`); ikon dari `stack.icons` dengan ukuran konsisten; tombol hanya-ikon wajib `aria-label`.
+   - **Istilah baku** mengikuti `project.language` dan design system (mis. "Masuk/Keluar", bukan campur bahasa). Bila `auth.mode = demo`, pita simulasi peran tampil di atas halaman dengan warna peringatan.
    - **Dilarang Desain Generik Khas AI:** Dilarang menggunakan *gradient ungu/biru neon*, *emoji* di dalam judul halaman, label tabel, maupun tombol aplikasi.
 
 ---
@@ -51,11 +47,11 @@ File besar mahal untuk diaudit/diperbaiki (model harus menulis ulang seluruh fil
 | Seeder modul | `prisma/seeds/<slug>.ts` |
 | Schema Zod + tipe DTO | `src/lib/validations/<slug>.ts` |
 | Aturan bisnis & guard (fungsi murni) | `src/lib/<slug>/rules.ts` (boleh tambah `src/lib/<slug>/*.ts` lain) |
-| Server actions per peran | `src/actions/<slug>/<peran>.ts` (mis. `mahasiswa.ts`, `dosen.ts`, `admin.ts`) |
+| Server actions per peran | `src/actions/<slug>/<peran>.ts` (mis. `anggota.ts`, `admin.ts`; tanpa login: per area, mis. `board.ts`, `card.ts`) |
 | Query data halaman (server) | `src/actions/<slug>/queries.ts` |
 | Tes backend | `scripts/verify-<slug>-backend.ts` |
 | Halaman | `src/app/<slug>/page.tsx`, `loading.tsx`, sub-rute di bawahnya |
-| Komponen client per area | `src/components/<slug>/<area>.tsx` (mis. `filter-bar.tsx`, `krs-table.tsx`, `detail-dialog.tsx`) |
+| Komponen client per area | `src/components/<slug>/<area>.tsx` (mis. `filter-bar.tsx`, `item-table.tsx`, `detail-dialog.tsx`) |
 
 - **Maksimal 400 baris per file** `.ts/.tsx` di `src/`. Lebih dari itu ditolak otomatis → pecah per peran (actions) atau per area layar (komponen).
 - `src/lib/auth.ts` dan `src/lib/prisma.ts` adalah **milik bersama**: hanya dibuat modul pertama. Modul berikutnya **import saja**, tidak menulis ulang.
@@ -70,13 +66,13 @@ File besar mahal untuk diaudit/diperbaiki (model harus menulis ulang seluruh fil
    - Peran yang salah **ditolak**, peran yang benar **boleh**.
    - Kuota/kapasitas **penuh ditolak**, sisa 1 **boleh** (dan bentrok jadwal ditolak bila relevan).
    - Setiap aturan di "Keputusan Final Gate 1" pada spec: 1 kasus lolos + 1 kasus ditolak.
-   - Pesan `assert` berbahasa Indonesia yang menjelaskan aturannya (mis. `"Mahasiswa lain tidak boleh mengubah KRS ini"`).
+   - Pesan `assert` berbahasa Indonesia yang menjelaskan aturannya (mis. `"Anggota lain tidak boleh mengubah kartu ini"`).
 4. `kaf-code.mjs` menjalankan tes ini setelah 3B dan di tahap 4. **Gagal = berhenti** (tidak dicentang, tidak di-commit, tidak diperbaiki otomatis).
 
 ---
 
 ## 6. Tabel Data dari Database Wajib Lazy (Paginasi di Server)
-1. Daftar yang berasal dari database (mahasiswa, KRS, tagihan, log, dll.) wajib:
+1. Daftar yang berasal dari database (pengguna, transaksi, tugas, log, dll.) wajib:
    - Query server memakai `skip`/`take` + `count` dan mengembalikan `{ rows, total, page, limit }`.
    - `page.tsx` membaca `page`, `limit`, `q`, `sort` dari `await searchParams` lalu memanggil query.
    - `<DataTable lazy paginator first={(page - 1) * limit} rows={limit} totalRecords={total} onPage={...} onSort={...} />` — handler mengubah URL (`router.replace` dengan `searchParams` baru) sehingga Server Component mengambil halaman berikutnya.
@@ -90,7 +86,7 @@ File besar mahal untuk diaudit/diperbaiki (model harus menulis ulang seluruh fil
    - Setiap `page.tsx` dan `layout.tsx` **WAJIB** berupa `async` *Server Component*.
    - Pengambilan data awal halaman (*initial data fetching*) wajib dilakukan langsung di *Server Component* (memanggil fungsi query server/Prisma), **DILARANG KERAS** melakukan fetch data awal di dalam `useEffect` pada sisi client!
 2. **Batas `'use client'` Hanya di Komponen Daun (Leaf Components):**
-   - Pasang `'use client'` hanya pada komponen interaktif PrimeReact di `src/components/<slug>/` yang membutuhkan *state*, *event handler*, atau *overlay* (`DataTable`, `Dialog`, `Toast`, `ConfirmDialog`).
+   - Pasang `'use client'` hanya pada komponen interaktif di `src/components/<slug>/` yang membutuhkan *state*, *event handler*, atau *overlay* (tabel, dialog, toast, drag & drop).
 3. **Mutasi via Server Actions + `useTransition` + `revalidatePath`:**
    - Semua mutasi data wajib menggunakan *Server Actions* (`'use server'`).
    - Di sisi client, panggil *Server Action* di dalam `startTransition(async () => { ... })` dari `useTransition()` agar state `isPending` otomatis mengaktifkan `<Button loading={isPending} disabled={isPending} />`.

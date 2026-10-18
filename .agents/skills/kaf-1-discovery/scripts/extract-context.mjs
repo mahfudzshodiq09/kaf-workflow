@@ -1,22 +1,22 @@
 #!/usr/bin/env node
 /**
- * Helper Ekstraksi HTML SEVIMA untuk Tahap 1 (Discovery - Format GEMINI)
- * Membersihkan noise visual (CSS, SVG, sidebar berulang 1600 baris di tiap file, base64 panjang)
- * namun MEMPERTAHANKAN 100% isi halaman utama (<aside class="right-side"> s/d akhir file),
- * termasuk struktur lengkap formulir (maxlength, required, name), tabel, modal, tombol,
- * serta inline script logika halaman.
+ * Helper Ekstraksi Konteks untuk Tahap 1 (Discovery)
+ * - Mode HTML (--html / --dir): membersihkan noise visual hasil scrape (CSS, SVG, sidebar berulang,
+ *   base64 panjang) namun mempertahankan isi halaman utama, formulir, tabel, modal, tombol, dan script halaman.
+ * - Mode dokumen (--docs <folder>): menggabungkan semua file .md/.txt di folder (beserta subfolder 1 tingkat).
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 
 function parseArgs(argv) {
-  const args = { dir: '', html: [], out: '' };
+  const args = { dir: '', html: [], out: '', docs: '' };
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--dir') args.dir = argv[++i];
     else if (a === '--html') args.html.push(...argv[++i].split(',').map((s) => s.trim()).filter(Boolean));
     else if (a === '--out') args.out = argv[++i];
+    else if (a === '--docs') args.docs = argv[++i];
   }
   return args;
 }
@@ -79,8 +79,24 @@ function cleanHtmlForAnalysis(relPath) {
   ].join('\n');
 }
 
+function collectDocs(dirRel) {
+  const dirFull = path.resolve(process.cwd(), dirRel);
+  if (!fs.existsSync(dirFull)) return [];
+  const out = [];
+  for (const entry of fs.readdirSync(dirFull, { withFileTypes: true })) {
+    const rel = path.join(dirRel, entry.name);
+    if (entry.isDirectory()) {
+      for (const sub of fs.readdirSync(path.join(dirFull, entry.name))) {
+        if (/\.(md|txt)$/i.test(sub)) out.push(path.join(rel, sub));
+      }
+    } else if (/\.(md|txt)$/i.test(entry.name)) out.push(rel);
+  }
+  return out.sort();
+}
+
 function main() {
   const args = parseArgs(process.argv);
+  const docFiles = args.docs ? collectDocs(args.docs) : [];
   const filesToProcess = [...args.html];
 
   if (args.dir) {
@@ -95,19 +111,22 @@ function main() {
     }
   }
 
-  if (filesToProcess.length === 0) {
-    console.error('Error: Gunakan --dir "<folder>" atau --html "<file1,file2>"');
+  if (filesToProcess.length === 0 && docFiles.length === 0) {
+    console.error('Error: Gunakan --dir "<folder>", --html "<file1,file2>", atau --docs "<folder>" (berisi .md/.txt)');
     process.exit(1);
   }
 
-  const results = filesToProcess.map((f) => cleanHtmlForAnalysis(f));
+  const results = [
+    ...filesToProcess.map((f) => cleanHtmlForAnalysis(f)),
+    ...docFiles.map((f) => `====================================================================\nDOKUMEN : ${f}\n====================================================================\n${fs.readFileSync(f, 'utf-8').trim()}`),
+  ];
   const finalOutput = results.join('\n\n');
 
   if (args.out) {
     const outPath = path.resolve(process.cwd(), args.out);
     fs.mkdirSync(path.dirname(outPath), { recursive: true });
     fs.writeFileSync(outPath, finalOutput, 'utf-8');
-    console.log(`[extract-context] ${filesToProcess.length} berkas berhasil diekstrak ke: ${args.out} (${(finalOutput.length / 1024).toFixed(1)} KB)`);
+    console.log(`[extract-context] ${filesToProcess.length + docFiles.length} berkas berhasil diekstrak ke: ${args.out} (${(finalOutput.length / 1024).toFixed(1)} KB)`);
   } else {
     console.log(finalOutput);
   }

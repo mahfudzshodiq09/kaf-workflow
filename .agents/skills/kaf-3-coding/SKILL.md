@@ -2,7 +2,7 @@
 name: kaf-3-coding
 description: >-
   Jalankan Tahap 3 (Sliced Implementation: 3A Database & Seed, 3B Backend & Zod Logic,
-  3C UI PrimeReact) dari Multi-Model KAF Workflow. Gunakan skill ini setelah dokumen
+  3C UI) dari Multi-Model KAF Workflow. Gunakan skill ini setelah dokumen
   Tech Spec (docs/specs/<fitur>.md) berstatus Approved di Gate 2.
 ---
 
@@ -13,11 +13,11 @@ Skill ini mengatur langkah kerja **Orchestrator** pada **Tahap 3**. Semua pembua
 dan menjaga gerbang otomatis — orchestrator **tidak** memanggil `9router.mjs` / `apply-code-bundle.mjs` manual
 untuk Tahap 3 (perintah manual melewati semua pengaman di bawah).
 
-| Slice | Isi | Model | File yang boleh ditulis |
+| Slice | Isi | Model (`kaf.config.json`) | File yang boleh ditulis |
 |---|---|---|---|
-| 3A | Model baru + seeder | `sol` | `prisma/modules/<slug>.prisma` (digabung otomatis ke schema), `prisma/seeds/<slug>.ts` |
-| 3B | Zod, aturan murni, actions, tes | `sol` | `src/lib/validations/<slug>.ts`, `src/lib/<slug>/**`, `src/actions/<slug>/**`, `scripts/verify-<slug>-backend.ts` (+ `src/lib/auth.ts` hanya untuk modul pertama) |
-| 3C | Halaman & komponen PrimeReact | `claude` | `src/app/<slug>/**`, `src/components/<slug>/**` |
+| 3A | Model baru + seeder | `models.database` | `prisma/modules/<slug>.prisma` (digabung otomatis ke schema), `prisma/seeds/<slug>.ts` |
+| 3B | Validasi, aturan murni, actions, tes | `models.backend` | `src/lib/validations/<slug>.ts`, `src/lib/<slug>/**`, `src/actions/<slug>/**`, `scripts/verify-<slug>-backend.ts` (+ `src/lib/auth.ts` hanya bila `auth.mode = demo` dan belum ada) |
+| 3C | Halaman & komponen UI | `models.ui` | `src/app/<slug>/**`, `src/components/<slug>/**` |
 
 ---
 

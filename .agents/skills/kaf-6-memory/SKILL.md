@@ -3,7 +3,7 @@ name: kaf-6-memory
 description: >-
   Jalankan Tahap 6 (Memory & Progress Update) dari Multi-Model KAF Workflow.
   Gunakan skill ini setelah developer menyatakan fitur LULUS UAT (Gate 3) untuk
-  memperbarui docs/PROGRESS.md menggunakan model ag/gemini-3.8-flash-high di 9router
+  memperbarui docs/PROGRESS.md menggunakan model models.memory (kaf.config.json) di 9router
   dan menggabungkan (merge) branch feat/<slug> ke main.
 ---
 
@@ -17,12 +17,12 @@ Tujuan utamanya adalah menjaga memori jangka panjang proyek di `docs/PROGRESS.md
 
 ## Langkah Eksekusi Step-by-Step
 
-### Langkah 1: Update `docs/PROGRESS.md` via `9router` (`flash`)
-Kirimkan `docs/specs/<slug>.md` dan `prisma/schema.prisma` (serta `docs/PROGRESS.md` jika sudah ada) ke model **`ag/gemini-3.8-flash-high`**:
+### Langkah 1: Update `docs/PROGRESS.md` via `9router` (`models.memory`)
+Kirimkan `docs/specs/<slug>.md` dan `prisma/schema.prisma` (serta `docs/PROGRESS.md` jika sudah ada) ke model `models.memory` (bawaan `flash`) — ganti `<role>` di bawah:
 
 ```bash
 node scripts/9router.mjs \
-  --role flash \
+  --role <role> \
   --system "Kamu adalah Technical Documentation Maintainer. Tugasmu adalah memelihara file docs/PROGRESS.md agar selalu ringkas, padat, dan akurat sebagai memori proyek." \
   --prompt "Perbarui (atau buat bila belum ada) dokumen docs/PROGRESS.md untuk mencatat bahwa fitur [<NAMA FITUR>] telah selesai dan LULUS UAT. Jika docs/PROGRESS.md lama terlampir, PERTAHANKAN seluruh catatan modul lain apa adanya dan hanya tambahkan/perbarui bagian modul ini. Cantumkan secara ringkas: (1) Daftar Fitur Selesai beserta tanggal & rute utamanya, (2) Katalog Tabel Database yang sudah aktif di prisma/schema.prisma (blok kaf-modul per modul), (3) Daftar Komponen & Helper Reusable (seperti Role Switcher, UI Contract, ActionResponse), dan (4) Catatan integrasi untuk modul berikutnya." \
   --files "docs/PROGRESS.md,docs/specs/<slug>.md,prisma/schema.prisma" \

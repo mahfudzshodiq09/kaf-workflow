@@ -1,0 +1,43 @@
+{
+  "_panduan": {
+    "project": "Nama & satu kalimat tujuan aplikasi. Dipakai di semua prompt model.",
+    "stack": "Teks bebas untuk model, kecuali prismaProvider: postgresql | mysql | sqlite | sqlserver | cockroachdb. Skrip mengasumsikan Next.js + Prisma + TypeScript.",
+    "designSystem": "Path dokumen tampilan (warna, huruf, komponen). Satu-satunya acuan visual.",
+    "auth.mode": "demo = Role Switcher untuk uji coba (peran dari auth.roles) · existing = pakai src/lib/auth.ts yang sudah ada · none = tanpa login",
+    "discovery.source": "interview = wawancara pilihan ganda · scrape = HTML hasil scrape di discovery.path · docs = dokumen (.md/.txt) di discovery.path",
+    "models": "Peran model di 9router per tahap: flash | sol | claude | <nama model langsung>",
+    "maxLines": "Batas baris per file .ts/.tsx di src/"
+  },
+  "project": {
+    "name": "Kanban Tim",
+    "description": "Papan kanban sederhana untuk mengelola tugas tim kecil.",
+    "language": "Bahasa Indonesia"
+  },
+  "stack": {
+    "framework": "Next.js 15 App Router + TypeScript (strict)",
+    "ui": "PrimeReact 10 + Tailwind CSS",
+    "icons": "lucide-react",
+    "database": "PostgreSQL",
+    "prismaProvider": "postgresql",
+    "validation": "Zod"
+  },
+  "designSystem": "docs/UI/design_system.md",
+  "auth": {
+    "mode": "demo",
+    "roles": ["ADMIN", "ANGGOTA"]
+  },
+  "discovery": {
+    "source": "interview",
+    "path": ""
+  },
+  "models": {
+    "discovery": "flash",
+    "spec": "sol",
+    "database": "sol",
+    "backend": "sol",
+    "ui": "claude",
+    "review": "sol",
+    "memory": "flash"
+  },
+  "maxLines": 400
+}

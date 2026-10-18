@@ -1,6 +1,6 @@
 # Checklist Audit Kode Otomatis (Tahap 4 — `kaf-4-review`)
 
-Model Reviewer (`cx/gpt-6.1-sol`) wajib memeriksa kode hasil Slice 3A, 3B, dan 3C berdasarkan 5 kategori tegas berikut:
+Model reviewer (`models.review` di `kaf.config.json`) wajib memeriksa kode hasil Slice 3A, 3B, dan 3C berdasarkan 5 kategori tegas berikut:
 
 ## 1. Kesesuaian Spesifikasi & Logika Bisnis (`docs/specs/<slug>.md`)
 - [ ] Seluruh keputusan Gate 1 dan Gate 2 pada `docs/specs/<slug>.md` terimplementasi dengan benar.
@@ -13,12 +13,12 @@ Model Reviewer (`cx/gpt-6.1-sol`) wajib memeriksa kode hasil Slice 3A, 3B, dan 3
 - [ ] Mutasi multi-tabel dibungkus di dalam `prisma.$transaction`.
 - [ ] Memiliki pengecekan *Role & Ownership* sebelum memutasi data.
 - [ ] Memiliki *Concurrency / Quota Guard* di dalam transaksi DB (anti kuota minus).
-- [ ] Mencatat aksi krusial ke tabel `AuditLog` dan tidak melakukan *hard-delete* pada histori akademik.
+- [ ] Aksi krusial dicatat (jejak perubahan) bila spec memintanya, dan data historis tidak di-*hard-delete*.
 - [ ] Tabel besar mendukung paginasi/filter (`skip` & `take`) dan mengembalikan `{ rows, total, page, limit }`.
 - [ ] Aturan peran/kepemilikan/kuota/Gate 1 ditulis sebagai **fungsi murni** di `src/lib/<slug>/rules.ts` dan dipakai oleh action (bukan disalin ulang di action).
 - [ ] `scripts/verify-<slug>-backend.ts` menguji: pemilik vs bukan pemilik, peran salah, kuota penuh, dan tiap aturan Gate 1 (lolos + ditolak). Tes yang hanya menguji Zod/format **belum cukup**.
 
-## 3. Kepatuhan 9 Kontrak UI PrimeReact & `docs/UI/design_system.md`
+## 3. Kepatuhan 9 Kontrak UI & Design System Proyek
 - [ ] `<BreadCrumb />` & Page Header tampil di halaman.
 - [ ] `<Skeleton />` tampil saat loading / transisi.
 - [ ] `<Button loading={isPending} disabled={isPending} />` terpasang pada tombol submit/aksi.
@@ -28,11 +28,11 @@ Model Reviewer (`cx/gpt-6.1-sol`) wajib memeriksa kode hasil Slice 3A, 3B, dan 3
 - [ ] `<DataTable>` untuk data database memakai `lazy` + `totalRecords` + `first` + `onPage`/`onSort` yang mengubah `searchParams` (paginasi di server), `rows={10}`, `rowsPerPageOptions={[10, 25, 50]}`, `stripedRows`, `removableSort`, serta kolom angka rata kanan (`tabular-nums`).
 - [ ] Menampilkan inline error (`p-invalid` & `<small className="p-error">`) jika ada `fieldErrors`.
 - [ ] Warna `<Tag />` sesuai standar (`info`, `warning`, `success`, `danger`).
-- [ ] **Patuh `docs/UI/design_system.md`:** Tidak ada penulisan hex `#...` langsung di file komponen/halaman (memakai variabel CSS `--primary-*`, `--neutral-*`, `--success/warning/danger/info-*`), ikon memakai `lucide-react`, banner simulasi peran memakai latar `--warning-50` & teks `--warning-700` dengan istilah **"Ganti peran"**.
+- [ ] **Patuh design system proyek** (`designSystem` di `kaf.config.json`): tidak ada hex `#...` langsung di komponen/halaman (memakai variabel CSS), ikon sesuai `stack.icons`, istilah sesuai `project.language`; bila `auth.mode = demo`, pita simulasi peran tampil.
 
 ## 4. Kepatuhan Aturan Next.js App Router
 - [ ] `page.tsx` dan `layout.tsx` adalah `async` *Server Component* (tidak mengambil data awal di dalam `useEffect`).
-- [ ] Direktif `'use client'` hanya dipasang pada komponen interaktif PrimeReact di `src/components/`.
+- [ ] Direktif `'use client'` hanya dipasang pada komponen interaktif di `src/components/`.
 - [ ] `params`, `searchParams`, dan `cookies()` di-`await` sesuai standar Next.js 15+.
 - [ ] Tidak ada objek `Decimal` atau `Date` mentah Prisma yang dikirim langsung ke *Client Component* tanpa serialisasi.
 
@@ -45,7 +45,7 @@ Model Reviewer (`cx/gpt-6.1-sol`) wajib memeriksa kode hasil Slice 3A, 3B, dan 3
 
 ---
 
-## Format Output Hasil Review dari Model `sol`
+## Format Output Hasil Review
 Jawaban dibaca otomatis oleh `kaf-code.mjs`, jadi formatnya wajib salah satu:
 - **Semua lulus:** tepat satu baris `LULUS_AUDIT_TANPA_PERBAIKAN`.
 - **Ada temuan:** maksimal 10 baris temuan singkat, lalu kode perbaikan utuh hanya untuk file yang berubah (maks 400 baris/file, hanya path modul ini):

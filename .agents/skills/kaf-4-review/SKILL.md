@@ -4,13 +4,13 @@ description: >-
   Jalankan Tahap 4 (Automated Code Review & Fix) dari Multi-Model KAF Workflow.
   Gunakan skill ini setelah Slice 3A, 3B, dan 3C selesai dikoding untuk menjalankan
   pengecekan TypeScript (tsc --noEmit) dan audit kode menyeluruh menggunakan model
-  cx/gpt-6.1-sol di 9router sebelum masuk ke Tahap 5 (UAT Developer).
+  reviewer di 9router (models.review) sebelum masuk ke Tahap 5 (UAT Developer).
 ---
 
 # KAF Tahap 4: Automated Code Review & Fix (`kaf-4-review`)
 
 Tujuan: kode hasil Tahap 3 **0 error TypeScript**, **tes backend lulus**, **bersih dari pelanggaran wajib**,
-dan **lulus audit `sol`** sebelum diuji developer di browser (Tahap 5 — UAT).
+dan **lulus audit reviewer** sebelum diuji developer di browser (Tahap 5 — UAT).
 
 ---
 
@@ -19,10 +19,10 @@ dan **lulus audit `sol`** sebelum diuji developer di browser (Tahap 5 — UAT).
 node scripts/kaf-code.mjs --slug <slug> --slice 4
 ```
 Urutan di dalam skrip:
-1. **4A** `npx tsc --noEmit` → error dikirim ke `sol` (maks 2x perbaikan, lalu dicek ulang; masih error → berhenti).
+1. **4A** `npx tsc --noEmit` → error dikirim ke `models.backend` (maks 2x perbaikan, lalu dicek ulang; masih error → berhenti).
 2. **Tes backend** `scripts/verify-<slug>-backend.ts` (gagal → berhenti, tidak diperbaiki otomatis).
 3. **kaf-check** (0 token): file > 400 baris, `any`/`@ts-ignore`, `page.tsx` ber-`'use client'`, `<DataTable paginator>` tanpa `lazy`, hex warna (saran).
-4. **4B Audit `sol`** terhadap `review-checklist.md`, `bundle-format-rules.md`, design system, spec, dan schema — temuan kaf-check ikut dikirim. Perbaikan hanya boleh menyentuh path modul ini.
+4. **4B Audit `models.review`** terhadap `review-checklist.md`, `bundle-format-rules.md`, design system, spec, dan schema — temuan kaf-check ikut dikirim. Perbaikan hanya boleh menyentuh path modul ini.
 5. Setelah perbaikan: tsc + tes backend + kaf-check diulang. Masih ada temuan wajib → berhenti.
 6. Lulus semua → commit di `feat/<slug>` dan tampilkan daftar file + baris untuk dibaca developer.
 

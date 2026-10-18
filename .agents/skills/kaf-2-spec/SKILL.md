@@ -1,70 +1,54 @@
 ---
 name: kaf-2-spec
 description: >-
-  Jalankan Tahap 2 (Unified Tech Spec: PRD + UI PrimeReact + DB Schema + API Contract) dari
+  Jalankan Tahap 2 (Unified Tech Spec: PRD + UI + DB Schema + Kontrak Action) dari
   Multi-Model KAF Workflow. Gunakan skill ini setelah dokumen Discovery (Tahap 1) memiliki
   Keputusan Final Gate 1, dengan mendelegasikan penyusunan docs/specs/<fitur>.md ke model
-  cx/gpt-6.1-sol di 9router.
+  spec di 9router (models.spec di kaf.config.json).
 ---
 
 # KAF Tahap 2: Unified Tech Spec (`kaf-2-spec`)
 
-Skill ini mengatur langkah kerja **Orchestrator** pada **Tahap 2** dari KAF Workflow.
-Tujuan utamanya adalah mengubah dokumen Proses Bisnis & Keputusan Gate 1 (`docs/discovery/<slug>.md`) menjadi **1 dokumen Spesifikasi Teknis Terpadu (`docs/specs/<slug>.md`)** menggunakan model **`sol` (`cx/gpt-6.1-sol`)** di `9router`.
+Mengubah dokumen proses bisnis & Keputusan Gate 1 (`docs/discovery/<slug>.md`) menjadi **1 dokumen spesifikasi
+teknis (`docs/specs/<slug>.md`)** memakai model `models.spec` dari `kaf.config.json` (bawaan `sol`).
 
 ## Aturan Mutlak Penulisan Tech Spec
-1. **Padat, Teknis, & To-The-Point:** Dokumen ini ditujukan untuk **Programmer & AI Coder**. Gunakan tabel, skema kode (`prisma`), dan poin-poin tajam tanpa kalimat pengantar yang bertele-tele.
-2. **Patuh 100% pada Keputusan Gate 1:** Seluruh aturan validasi, alur layar, dan struktur tabel wajib mengimplementasikan bagian **"Keputusan Final Alur Kampus (Terkunci — Gate 1)"** pada `docs/discovery/<slug>.md`.
-3. **Wajib Memuat 9 Standar UI PrimeReact:**
-   - `<BreadCrumb />` & Page Header di tiap halaman
-   - `<Skeleton />` saat loading data / ganti filter
-   - `<Button disabled={isPending} loading={isPending} />` saat submit
-   - `<Toast />` untuk setiap feedback mutasi
-   - `<ConfirmDialog />` untuk aksi krusial/destruktif/massal
-   - *Empty State* informatif pada `<DataTable>`
-   - Standar `<DataTable>` (`paginator` 10/25/50, `stripedRows`, `removableSort`, search)
-   - Validasi form inline (`p-invalid` & `<small className="p-error">`)
-   - Standar warna `<Tag />` (`info`, `warning`, `success`, `danger`)
-4. **Wajib Memuat 7 Standar Backend (BE):**
-   - Kontrak return seragam `ActionResponse<T>` (`{ success, message, data, fieldErrors }`) tanpa crash 500
-   - Validasi input server dengan `Zod`
-   - Transaksi atomik `prisma.$transaction` untuk mutasi multi-tabel
-   - *Role & Ownership Guard* di baris pertama setiap action
-   - *Concurrency / Quota Guard* di dalam transaksi DB (anti kuota kelas minus)
-   - Pencatatan *Audit Log* otomatis (`AuditLog`) & larangan *hard-delete* sembarangan
-   - *Server-side pagination & filtering* (`skip` & `take`) untuk tabel daftar besar
-5. **Mandiri untuk Diuji (Mock Role Switcher + Minimal Stub Tables):**
-   - Menyertakan desain **Role Switcher** sederhana dan **Tabel Stub Referensi + Data Seeder** secukupnya agar fitur bisa langsung dijalankan dan diuji di browser pada Tahap 5 (UAT).
-6. **Anti Over-Engineering (KISS & YAGNI) & Checklist Task Bertahap:**
-   - Rancang jumlah tabel dan Server Actions **seramping mungkin** (jangan membuat *background cron/worker*, *custom crypto*, atau *abstraction layer* jika bisa diselesaikan dengan query/transaksi langsung).
-   - **Struktur file mengikuti `bundle-format-rules.md` §4:** actions dipecah per peran, komponen per area, **maks 400 baris per file**, rute halaman = `/<slug>`. Lebih baik 10 file kecil daripada 2 file raksasa.
-   - **Schema bersama:** hanya rancang model BARU; model yang sudah ada di `prisma/schema.prisma` cukup direferensikan. Perubahan model lama ditulis di sub-bagian "Perubahan Model Lama (Manual)".
-   - Bagian 6 wajib berupa **Checklist Task Eksekusi (`- [ ]`)** dengan kode task spesifik (`T3A.1`, `T3A.2`, `T3B.1`, `T3B.2`, `T3C.1`, dst.) agar developer bisa mengerjakan sebagian (nyicil), menghentikan proses kapan saja jika waktu/token terbatas, dan melanjutkan kembali (*Pause & Resume*).
-7. **WAJIB BERHENTI di Gate 2:** Setelah `docs/specs/<slug>.md` selesai dibuat, Orchestrator dilarang menulis kode aplikasi sebelum developer me-*review* dan menyetujui dokumen Tech Spec tersebut.
+1. **Padat, Teknis, To-The-Point** untuk programmer & AI coder: tabel, skema `prisma`, poin tajam.
+2. **Patuh 100% pada Keputusan Gate 1** di `docs/discovery/<slug>.md`.
+3. **Sesuai profil proyek** (`kaf.config.json`): stack, library UI, mode login (`auth.mode`), design system, bahasa.
+4. **Wajib memuat 9 Kontrak UI & 7 Pilar Backend** seperti di [spec-template.md](./resources/spec-template.md).
+5. **Mandiri untuk diuji:** data seed secukupnya; bila `auth.mode = demo` sertakan peran & akun Role Switcher dari `auth.roles`.
+6. **Anti Over-Engineering & Checklist Bertahap:**
+   - Tabel dan Server Actions **seramping mungkin** (tanpa cron/worker, custom crypto, atau abstraction layer yang tidak perlu).
+   - **Struktur file mengikuti `bundle-format-rules.md` §4:** actions per peran/area, komponen per area, **maks `maxLines` baris per file**,
+     rute halaman = `/<slug>`. Lebih baik 10 file kecil daripada 2 file raksasa.
+   - **Schema bersama:** hanya rancang model BARU; model yang sudah ada di `prisma/schema.prisma` cukup direferensikan.
+   - Bagian 6 wajib berupa tabel Checklist Task (`T3A.x`, `T3B.x`, `T3C.x`) untuk Pause & Resume.
+7. **WAJIB BERHENTI di Gate 2.**
 
 ---
 
-## Langkah Eksekusi Step-by-Step
+## Langkah Eksekusi
 
 ### Langkah 1: Pastikan Gate 1 Sudah Terkunci
-Periksa apakah `docs/discovery/<slug>.md` sudah memiliki bagian **Keputusan Final Alur Kampus (Gate 1)**.
+`docs/discovery/<slug>.md` harus sudah memiliki bagian **Keputusan Final (Terkunci — Gate 1)**.
 
-### Langkah 2: Delegasikan Penyusunan Unified Tech Spec ke `9router` (`sol`)
-Kirim file `docs/discovery/<slug>.md`, `docs/UI/design_system.md`, dan template [spec-template.md](./resources/spec-template.md) ke model **`cx/gpt-6.1-sol`** melalui `scripts/9router.mjs`:
+### Langkah 2: Delegasikan ke `9router`
+Ganti `<role>` dengan `models.spec` dan `<design-system>` dengan `designSystem` dari `kaf.config.json`:
 
 ```bash
 node scripts/9router.mjs \
-  --role sol \
-  --system "Kamu adalah Principal Fullstack Architect yang ahli merancang sistem SIAKAD modern menggunakan Next.js (App Router + TypeScript), PrimeReact, lucide-react, Tailwind CSS, Prisma ORM, Zod, dan PostgreSQL. Prinsip utamamu adalah KISS & YAGNI (Jangan Over-Engineering) dan patuh 100% pada docs/UI/design_system.md." \
-  --prompt "Susun dokumen Unified Tech Spec untuk [<NAMA FITUR>] berdasarkan dokumen proses bisnis & Keputusan Final Gate 1 serta docs/UI/design_system.md terlampir, dengan mengikuti struktur persis pada spec-template.md. Pastikan: (1) Skenario Role Switcher ('Ganti peran') simpel agar semua role bisa diuji coba langsung tanpa menunggu modul SSO, (2) Spesifikasi halaman & komponen PrimeReact + lucide-react yang mematuhi docs/UI/design_system.md beserta 9 Kontrak Standar UI/UX Wajib, (3) 7 Standar Arsitektur Backend Wajib + aturan validasi spesifik Keputusan Gate 1 tanpa over-engineering, (4) ERD Mermaid + HANYA model baru (prisma/schema.prisma terlampir adalah schema bersama: model yang sudah ada cukup direferensikan) + skenario data uji seeder, (5) Tabel kontrak Server Actions yang ringkas dan esensial saja, beserta aturan guard yang akan dites di scripts/verify-<slug>-backend.ts, dan (6) Tabel Checklist Task Eksekusi T3A.x, T3B.x, T3C.x dengan File Target sesuai bundle-format-rules.md §4 (rute /<slug>, actions per peran, komponen per area, maks 400 baris/file, tabel database lazy)." \
-  --files ".agents/skills/kaf-2-spec/resources/spec-template.md,.agents/skills/kaf-3-coding/resources/bundle-format-rules.md,docs/UI/design_system.md,docs/discovery/<slug>.md,prisma/schema.prisma" \
+  --role <role> \
+  --system "Kamu adalah Principal Fullstack Architect. Rancang sesuai profil di kaf.config.json (stack, UI, mode login, bahasa). Prinsip utama: KISS & YAGNI dan patuh 100% pada design system proyek." \
+  --prompt "Susun Unified Tech Spec untuk [<NAMA FITUR>] berdasarkan dokumen proses bisnis & Keputusan Final Gate 1 terlampir, mengikuti struktur persis spec-template.md. Pastikan: (1) peran & skenario uji sesuai auth.mode, (2) halaman & komponen sesuai stack.ui dan design system beserta 9 Kontrak UI, (3) 7 Pilar Backend + aturan spesifik Gate 1 tanpa over-engineering, (4) ERD + HANYA model baru (prisma/schema.prisma terlampir adalah schema bersama; model lama cukup direferensikan) + data uji seeder, (5) kontrak Server Actions ringkas beserta aturan yang akan dites di scripts/verify-<slug>-backend.ts, (6) Tabel Checklist T3A/T3B/T3C dengan File Target sesuai bundle-format-rules.md §4 (rute /<slug>, maks maxLines baris/file, tabel database lazy)." \
+  --files "kaf.config.json,.agents/skills/kaf-2-spec/resources/spec-template.md,.agents/skills/kaf-3-coding/resources/bundle-format-rules.md,<design-system>,docs/discovery/<slug>.md,prisma/schema.prisma" \
   --out "docs/specs/<slug>.md"
 ```
-
-*(Jalankan dengan `BypassSandbox: true` jika koneksi localhost `9router` diblokir oleh sandbox).*
+*(File yang belum ada, mis. `prisma/schema.prisma` di proyek baru, dilewati otomatis. Jalankan dengan `BypassSandbox: true`
+jika koneksi localhost `9router` diblokir sandbox.)*
 
 ### Langkah 3: Gate 2 — Review & Approval Developer
-1. Periksa apakah `docs/specs/<slug>.md` sudah terbentuk dengan lengkap dan rapi.
-2. Tampilkan link klik-able `[docs/specs/<slug>.md](file:///.../docs/specs/<slug>.md)` kepada developer.
-3. Tanyakan kepada developer apakah dokumen Tech Spec tersebut sudah disetujui (**Gate 2 Approval**) atau ada yang perlu direvisi sebelum masuk ke Tahap 3 (Coding).
-4. **STOP.** Tunggu *approval* developer sebelum melangkah ke Tahap 3.
+1. Tampilkan link `docs/specs/<slug>.md` kepada developer dan minta review.
+2. Setelah developer setuju, ubah baris status menjadi `> **Status:** ✅ Disetujui & Terkunci oleh Developer (Gate 2)`
+   — `kaf-code.mjs` menolak spec yang belum berstatus ini.
+3. **STOP.** Tunggu approval sebelum Tahap 3.

@@ -12,8 +12,17 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { readConfig } from "./kaf-config.mjs";
 
-export const MAX_LINES = Number(process.env.KAF_MAX_LINES || 400);
+function configMaxLines() {
+  try {
+    return readConfig().maxLines;
+  } catch {
+    return 400;
+  }
+}
+
+export const MAX_LINES = Number(process.env.KAF_MAX_LINES || configMaxLines());
 
 function lineOf(text, index) {
   return text.slice(0, index).split("\n").length;
