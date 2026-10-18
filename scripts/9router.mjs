@@ -38,6 +38,8 @@ const CONFIG = {
     sol: process.env.MODEL_SOL || 'gpt-6.1-sol',
     claude: process.env.MODEL_CLAUDE || process.env.MODEL_FLASH || 'gemini-3.8-flash',
   },
+  // Opsional: batas output per panggilan (MAX_OUTPUT_TOKENS di .env). Kosong = bawaan provider.
+  maxTokens: Number(process.env.MAX_OUTPUT_TOKENS) || 0,
 };
 
 function parseArgs(argv) {
@@ -94,6 +96,7 @@ async function callChatCompletion({ model, system, userContent }) {
       messages,
       temperature: 0.2,
       stream: false,
+      ...(CONFIG.maxTokens ? { max_tokens: CONFIG.maxTokens } : {}),
     }),
   });
 
@@ -106,6 +109,7 @@ async function callChatCompletion({ model, system, userContent }) {
   const trimmed = rawText.trim();
   if (trimmed.startsWith('data:')) {
     let fullContent = '';
+    let finishReason = '';
     for (const line of trimmed.split('\n')) {
       const clean = line.trim();
       if (!clean.startsWith('data:')) continue;
@@ -118,15 +122,19 @@ async function callChatCompletion({ model, system, userContent }) {
           parsed.choices?.[0]?.message?.content ??
           '';
         fullContent += delta;
+        finishReason = parsed.choices?.[0]?.finish_reason || finishReason;
       } catch {
         // abaikan baris non-JSON
       }
     }
-    return fullContent;
+    return { content: fullContent, finishReason };
   }
 
   const data = JSON.parse(trimmed);
-  return data.choices?.[0]?.message?.content || '';
+  return {
+    content: data.choices?.[0]?.message?.content || '',
+    finishReason: data.choices?.[0]?.finish_reason || '',
+  };
 }
 
 async function main() {
@@ -153,7 +161,7 @@ async function main() {
           model: modelName,
           userContent: 'Balas dengan satu kalimat singkat: "Koneksi 9router siap!" beserta nama modelmu.',
         });
-        console.log(`BERHASIL!\n  Respon: ${reply.trim()}\n`);
+        console.log(`BERHASIL!\n  Respon: ${reply.content.trim()}\n`);
       } catch (err) {
         console.log(`GAGAL!\n  Error: ${err.message}\n`);
       }
@@ -189,7 +197,7 @@ async function main() {
     : promptText;
 
   console.log(`[9router] Mengirim tugas ke model: ${targetModel}...`);
-  const result = await callChatCompletion({
+  const { content: result, finishReason } = await callChatCompletion({
     model: targetModel,
     system: args.system,
     userContent: finalUserContent,
@@ -203,6 +211,12 @@ async function main() {
   } else {
     console.log('\n--- OUTPUT MODEL ---\n');
     console.log(result);
+  }
+
+  // Jawaban berhenti karena batas panjang = hasil TIDAK lengkap, walau blok yang ada terlihat rapi.
+  if (finishReason === 'length') {
+    console.error('KAF_TRUNCATED: model berhenti karena batas panjang output (finish_reason=length). Hasil tidak lengkap.');
+    process.exit(3);
   }
 }
 

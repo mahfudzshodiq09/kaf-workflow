@@ -30,6 +30,7 @@ const ITEMS_TO_COPY = [
   ".agents/skills/kaf-status",
   "scripts/9router.mjs",
   "scripts/kaf-code.mjs",
+  "scripts/kaf-check.mjs",
   "scripts/kaf-status.mjs",
   "scripts/install-kaf.mjs",
   "docs/UI/design_system.md",

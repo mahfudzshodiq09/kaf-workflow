@@ -24,8 +24,8 @@ Kirimkan `docs/specs/<slug>.md` dan `prisma/schema.prisma` (serta `docs/PROGRESS
 node scripts/9router.mjs \
   --role flash \
   --system "Kamu adalah Technical Documentation Maintainer. Tugasmu adalah memelihara file docs/PROGRESS.md agar selalu ringkas, padat, dan akurat sebagai memori proyek." \
-  --prompt "Perbarui (atau buat) dokumen docs/PROGRESS.md untuk mencatat bahwa fitur [<NAMA FITUR>] telah selesai dan LULUS UAT. Cantumkan secara ringkas: (1) Daftar Fitur Selesai beserta tanggal & rute utamanya, (2) Katalog Tabel Database yang sudah aktif di prisma/schema.prisma, (3) Daftar Komponen & Helper Reusable (seperti Role Switcher, UI Contract, ActionResponse), dan (4) Catatan integrasi untuk modul berikutnya." \
-  --files "docs/specs/<slug>.md,prisma/schema.prisma" \
+  --prompt "Perbarui (atau buat bila belum ada) dokumen docs/PROGRESS.md untuk mencatat bahwa fitur [<NAMA FITUR>] telah selesai dan LULUS UAT. Jika docs/PROGRESS.md lama terlampir, PERTAHANKAN seluruh catatan modul lain apa adanya dan hanya tambahkan/perbarui bagian modul ini. Cantumkan secara ringkas: (1) Daftar Fitur Selesai beserta tanggal & rute utamanya, (2) Katalog Tabel Database yang sudah aktif di prisma/schema.prisma (blok kaf-modul per modul), (3) Daftar Komponen & Helper Reusable (seperti Role Switcher, UI Contract, ActionResponse), dan (4) Catatan integrasi untuk modul berikutnya." \
+  --files "docs/PROGRESS.md,docs/specs/<slug>.md,prisma/schema.prisma" \
   --out "docs/PROGRESS.md"
 ```
 
